@@ -1,0 +1,90 @@
+version: "3.8"
+
+services:
+  # MQTT Broker for IoT devices
+  mqtt:
+    image: eclipse-mosquitto:2.0.18
+    container_name: autoforge-mqtt
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./docker/mosquitto/config:/mosquitto/config
+      - ./docker/mosquitto/data:/mosquitto/data
+      - ./docker/mosquitto/log:/mosquitto/log
+    environment:
+      - TZ=UTC
+    healthcheck:
+      test: ["CMD", "mosquitto_sub", "-h", "localhost", "-t", "$$SYS/#", "-C", "1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - autoforge
+
+  # PostgreSQL Database (optional, for production-like testing)
+  postgres:
+    image: postgres:15-alpine
+    container_name: autoforge-postgres
+    environment:
+      POSTGRES_USER: autoforge
+      POSTGRES_PASSWORD: autoforge_dev_pass
+      POSTGRES_DB: autoforge
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U autoforge"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - autoforge
+    profiles:
+      - postgres  # Optional: only run with --profile postgres
+
+  # AutoForge Backend
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: autoforge-backend
+    ports:
+      - "5000:5000"
+    environment:
+      # MQTT Configuration
+      MQTT_BROKER: mqtt
+      MQTT_PORT: 1883
+      SENSOR_TOPIC: sensors/+/data
+      CONTROL_TOPIC: control/+/command
+      
+      # Database Configuration (SQLite by default)
+      DATABASE_URL: sqlite:///sensors.db
+      # Or use PostgreSQL (when profile is active):
+      # DATABASE_URL: postgresql://autoforge:autoforge_dev_pass@postgres:5432/autoforge
+      
+      # Flask Configuration
+      FLASK_HOST: 0.0.0.0
+      FLASK_PORT: 5000
+      FLASK_ENV: development
+      
+      # Logging Configuration
+      LOG_LEVEL: INFO
+    volumes:
+      - ./backend:/app
+      - autoforge_data:/app/data
+    depends_on:
+      mqtt:
+        condition: service_healthy
+    networks:
+      - autoforge
+    restart: unless-stopped
+    command: python app.py
+
+networks:
+  autoforge:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  autoforge_data:

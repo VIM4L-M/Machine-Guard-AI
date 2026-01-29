@@ -1,0 +1,15 @@
+# Flask web framework
+Flask==3.0.0
+flask-cors==4.0.0
+
+# MQTT protocol client
+paho-mqtt==2.1.0
+
+# Environment variable loading
+python-dotenv==1.0.0
+
+# Database ORM
+SQLAlchemy==2.0.46
+
+# Database drivers (optional; install if using PostgreSQL)
+firebase-admin==6.2.0

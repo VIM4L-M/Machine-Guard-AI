@@ -1,0 +1,1 @@
+{"min_anom": -0.04552516613246952, "max_nice": 0.23360946024275253, "baseline_mean": {"temperature": 25.397000000000006, "humidity": 59.36600000000001, "gas": 875.88, "vibration": 0.05, "current": 0.062}, "baseline_std": {"temperature": 0.1209850145157397, "humidity": 2.7300135049801013, "gas": 11.356731639664362, "vibration": 0.21904291355759029, "current": 0.08419553960210058}}

@@ -1,0 +1,12 @@
+{
+    "max_nice_score": 0.1539317863690917,
+    "decision_boundary": 0.0,
+    "min_bad_score": -0.25,
+    "feature_names": [
+        "temperature",
+        "humidity",
+        "gas",
+        "current",
+        "vibration"
+    ]
+}
